@@ -1,17 +1,27 @@
 import discord
-from discord.ext import commands
+import asyncio
 
-bot = commands.Bot(command_prefix='!')
+client = discord.Client()
 
-@bot.event
+@client.event
 async def on_ready():
     print('Logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
+    print(client.user.name)
+    print(client.user.id)
     print('------')
 
-@bot.command()
-async def greet(ctx):
-    await ctx.send(":smiley: :wave: Hello, there!")
+@client.event
+async def on_message(message):
+    if message.content.startswith('!test'):
+        counter = 0
+        tmp = await client.send_message(message.channel, 'Calculating messages...')
+        async for log in client.logs_from(message.channel, limit=100):
+            if log.author == message.author:
+                counter += 1
 
-bot.run('NTMzNjkwNTM2MzQ3ODI4MjI0.DzNabw.X1mDxnYVNHVjKssQ0z4pGOacDGY')
+        await client.edit_message(tmp, 'You have {} messages.'.format(counter))
+    elif message.content.startswith('!sleep'):
+        await asyncio.sleep(5)
+        await client.send_message(message.channel, 'Done sleeping')
+
+client.run('NTMzNjkwNTM2MzQ3ODI4MjI0.DzNabw.X1mDxnYVNHVjKssQ0z4pGOacDGY')
